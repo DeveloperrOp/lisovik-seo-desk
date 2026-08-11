@@ -103,7 +103,7 @@ input[type=checkbox]{width:15px;height:15px;accent-color:var(--accent);cursor:po
   white-space:nowrap;cursor:pointer}
 #sync .dot{width:8px;height:8px;border-radius:50%;background:var(--dim);flex:none}
 #sync.ok .dot{background:var(--accent)}
-#sync.off .dot{background:var(--warn)}
+#sync.off .dot{background:var(--dim)}
 #sync.err .dot{background:var(--bad)}
 #sync.busy .dot{background:var(--accent);animation:pulse 1s infinite}
 @keyframes pulse{50%{opacity:.25}}
@@ -130,8 +130,9 @@ dialog .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
   <span class="chip" id="settings">налаштування</span>
 </div></header>
 <main id="list"></main>
-<footer>Галочки «вставлено» зберігаються в браузері й, коли ввімкнено спільний прогрес,
-синхронізуються між компʼютерами — видно, хто й коли відмітив. Джерело даних —
+<footer>Галочки «вставлено» зберігаються в цьому браузері — переживають закриття вкладки
+й наступний день. Передати комусь свій прогрес: «налаштування → зберегти прогрес у файл»,
+інша людина відкриє його через «відновити з файла». Джерело даних —
 <b>Категорії — мета, тексти, правки, посилання.xlsx</b>; сторінку перезбирає
 <code>scripts/build_categories_workbench.py</code>.</footer>
 <dialog id="dlg"><h2>Налаштування</h2>
@@ -377,7 +378,7 @@ function fetchT(url, opts, ms) {
     .finally(() => clearTimeout(id));
 }
 async function pull() {
-  const url = syncUrl(); if (!url) { setSync('off', 'лише цей браузер'); return; }
+  const url = syncUrl(); if (!url) { setSync('off', 'галочки зберігаються тут'); return; }
   try {
     setSync('busy', 'синхронізація…');
     const r = await fetchT(url + (url.includes('?') ? '&' : '?') + 'v=' + Date.now());
@@ -419,7 +420,7 @@ async function push() {
 }
 function markChanged(k) {
   pending.add(k);
-  if (!syncUrl()) { setSync('off', 'лише цей браузер'); return; }
+  if (!syncUrl()) { setSync('off', 'галочки зберігаються тут'); return; }
   clearTimeout(pushTimer); pushTimer = setTimeout(push, 1200);
 }
 
@@ -500,6 +501,8 @@ if (syncUrl()) {
   setInterval(() => { if (!document.hidden && Date.now() - lastPull > 20000) pull(); }, 25000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); });
 } else {
-  setSync('off', 'лише цей браузер', 'адресу спільного прогресу можна вказати в налаштуваннях');
+  setSync('off', 'галочки зберігаються тут',
+    'Прогрес живе в цьому браузері: закриття вкладки, перезавантаження й наступний день йому '
+    + 'не страшні. Щоб передати його комусь — «налаштування → зберегти прогрес у файл».');
 }
 </script></body></html>
