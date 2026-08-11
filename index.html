@@ -246,14 +246,17 @@ function linksTable(p) {
     '<th>обгорнути фразу</th><th>веде на</th><th></th></tr>';
   p.links.forEach((l, i) => {
     const key = p.key + '|link|' + i;
-    const a = '<a href="' + l.target + '">' + l.phrase + '</a>';
+    // дві дії, як у правках: окремо фраза (щоб знайти її в тексті) і окремо адреса
+    // (щоб вставити в поле посилання редактора). Адресу копіюємо повну — редактор
+    // Horoshop зберігає її як є, а відносний шлях у чужому полі може не спрацювати.
+    const full = /^https?:/.test(l.target) ? l.target : 'https://lisovik.com.ua' + l.target;
     h += '<tr class="' + (isDone(key) ? 'ok' : '') + '" data-row="' + key + '">' +
       '<td class="act"><input type="checkbox" data-k="' + key + '"' + (isDone(key) ? ' checked' : '') +
       '> <span class="badge ' + l.lang + '">' + l.lang.toUpperCase() + '</span></td>' +
       '<td class="find">' + esc(l.phrase) + '</td>' +
       '<td class="repl"><div>' + esc(l.target) + '</div>' +
       (l.why ? '<span class="wl">навіщо</span><div class="why">' + esc(l.why) + '</div>' : '') +
-      '</td><td class="act">' + cpBtn(a, 'копіювати &lt;a&gt;') + '</td></tr>';
+      '</td><td class="act">' + cpBtn(l.phrase, 'фраза') + ' ' + cpBtn(full, 'адреса') + '</td></tr>';
   });
   return h + '</table>';
 }
