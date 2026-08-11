@@ -142,9 +142,27 @@ dialog .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 <script>
 const DATA = JSON.parse(document.getElementById('data').textContent);
 const LS = 'lisovik.blog.progress.v1';
+const DONE_AT = 1786453479517;
 const CFG = 'lisovik.blog.cfg';
 let state = {}, cfg = {name: ''};
 try { state = JSON.parse(localStorage.getItem(LS) || '{}'); } catch (e) { state = {}; }
+// Мету й готові вставки залито скриптом і перевірено на живому сайті — проставляємо
+// ці галочки одразу, інакше стіл показував би «готово 0» і брехав про стан роботи.
+// Ручні зміни користувача мають пріоритет: чіпаємо лише те, чого ще немає в state.
+(function () {
+  let touched = false;
+  DATA.forEach(a => {
+    ['ua', 'ru'].forEach(l => {
+      const k = a.slug + '|meta|' + l;
+      if (a[l] && a[l].url && !state[k]) { state[k] = {v: 1, t: DONE_AT, who: 'скрипт'}; touched = true; }
+    });
+    a.inserts.forEach((x, i) => {
+      const k = a.slug + '|ins|' + i;
+      if (x.status === 'ready' && !state[k]) { state[k] = {v: 1, t: DONE_AT, who: 'скрипт'}; touched = true; }
+    });
+  });
+  if (touched) localStorage.setItem(LS, JSON.stringify(state));
+})();
 try { cfg = Object.assign(cfg, JSON.parse(localStorage.getItem(CFG) || '{}')); } catch (e) {}
 const isDone = k => !!(state[k] && state[k].v);
 const saveLocal = () => localStorage.setItem(LS, JSON.stringify(state));
